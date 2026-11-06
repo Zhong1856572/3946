@@ -28,8 +28,13 @@ const HERE = path.dirname(fileURLToPath(import.meta.url))
 const BUNDLE_DIR = path.resolve(
   process.env.ESD_BUNDLE_DIR || path.resolve(HERE, 'bundle'),
 )
-const ZIP = path.join(HERE, `erp-sales-dashboard-plugin-${PLUGIN_VERSION}.zip`)
-const TGZ = path.join(HERE, `erp-sales-dashboard-${PLUGIN_VERSION}.tgz`)
+// 发布件优先取 releases/（仓库里的分发位），没有再取插件根目录（node pack.mjs 的输出位）
+const pickArtifact = (name) => {
+  const inReleases = path.join(HERE, 'releases', name)
+  return fs.existsSync(inReleases) ? inReleases : path.join(HERE, name)
+}
+const ZIP = pickArtifact(`erp-sales-dashboard-plugin-${PLUGIN_VERSION}.zip`)
+const TGZ = pickArtifact(`erp-sales-dashboard-${PLUGIN_VERSION}.tgz`)
 
 let failed = 0
 let passed = 0
@@ -381,8 +386,8 @@ function main() {
   console.log(`zip：${ZIP}`)
   console.log(`tgz：${TGZ}`)
   if (!fs.existsSync(BUNDLE_DIR)) { console.log('✘ 源 bundle 不存在，先跑 node pack.mjs'); process.exit(1) }
-  if (!fs.existsSync(ZIP)) { console.log('✘ zip 不存在，先跑 node pack.mjs'); process.exit(1) }
-  if (!fs.existsSync(TGZ)) { console.log('✘ tgz 不存在，先跑 node pack.mjs'); process.exit(1) }
+  if (!fs.existsSync(ZIP)) { console.log('✘ zip 不存在（releases/ 与插件根目录都没找到），先跑 node pack.mjs'); process.exit(1) }
+  if (!fs.existsSync(TGZ)) { console.log('✘ tgz 不存在（releases/ 与插件根目录都没找到），先跑 node pack.mjs'); process.exit(1) }
 
   // 路线 A：zip —— 解开后从 bundle/ 目录装（原生安装：由安装器现场打 tgz 交给 dsh plugin add）
   runRoute('路线 A（zip + 原生安装）', (work) => {
