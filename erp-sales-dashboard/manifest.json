@@ -1,0 +1,171 @@
+{
+  "schema": "dsh-plugin-installer/v1",
+  "name": "erp-sales-dashboard",
+  "displayName": "ERP 销售仪表盘",
+  "version": "1.4.0",
+  "description": "面向业务咨询销售线的作战看板：业绩达成总览、订单质量与结构、回款与售后、客户资产与激活、获客与转化、学习考核与成长、订单待办、数据口径与可得性、客户档案（含中国省份地图）、业务员档案，共 10 个页签；数据全部由 ERP / STD 的 MCP 只读工具驱动，并内置 AI 分析侧边对话框。v1.2.0 起界面配色整体对齐 DSH 设计系统，与「ERP 业务工作台」同一套色板。",
+  "plugin": {
+    "packageName": "@local/erp-sales-dashboard",
+    "pluginId": "erp-sales-dashboard",
+    "bundlesRegistrationName": "@local/erp-sales-dashboard",
+    "type": "dsh-bundle",
+    "host": "index.js",
+    "client": "client.js",
+    "bundlePatch": "cordis.patch.yml",
+    "icon": "icon.svg",
+    "locales": [
+      "locale/zh.json",
+      "locale/en.json"
+    ]
+  },
+  "requires": {
+    "node": ">=18",
+    "dsh": "DSH 桌面版（bundle + web client 插件体系）",
+    "mcpConnectors": [
+      "mcp__erp__*（ERP 业务咨询事业群数据分析，端口 8001）",
+      "mcp__std__*（ERP Unified Analytics / STD，端口 8006）",
+      "mcp__planning__*（ERP 统筹数据分析，端口 8003，仅部分板块使用）"
+    ],
+    "optional": [
+      "AI 对话需要 DSH 已配置可用的 LLM provider（默认写 minimax-cn / MiniMax-M3.1-Flash，缺凭据时插件会回退到 DSH 当前选择的模型）"
+    ],
+    "notes": "插件只做只读查询；所有取数都走 DSH 已配置的 MCP 连接器，安装包本身不含任何凭据。"
+  },
+  "files": {
+    "installer": [
+      "install.mjs",
+      "install.ps1",
+      "install.sh",
+      "uninstall.mjs",
+      "uninstall.ps1",
+      "uninstall.sh",
+      "check-install.mjs",
+      "check-install.ps1",
+      "check-install.sh",
+      "pack.mjs",
+      "manifest.json",
+      "README.md",
+      "INSTALL.md",
+      "lib/cli.mjs",
+      "lib/config-defaults.mjs",
+      "lib/fsx.mjs",
+      "lib/mini-yaml.mjs",
+      "lib/patch-editor.mjs",
+      "lib/tar.mjs",
+      "lib/zip.mjs"
+    ],
+    "bundle": [
+      "index.js",
+      "client.js",
+      "cordis.patch.yml",
+      "package.json",
+      "icon.svg",
+      "locale/zh.json",
+      "locale/en.json",
+      "lib/mini-yaml.mjs",
+      "lib/required-tools.mjs",
+      "README.md",
+      "CONTRACT.md",
+      "selfcheck.mjs",
+      "verify-host.mjs",
+      "docs/数据口径与准确性保障说明.md",
+      "docs/需求覆盖矩阵.md",
+      "docs/配色规范.md"
+    ],
+    "bundleExcluded": [
+      "node_modules/**",
+      "cache/**",
+      "docs/screenshots/**",
+      "**/*.bak-*",
+      "**/*.local.json（含 mcp.endpoints.local.json：真实凭据，绝不随包分发）",
+      "mcp.endpoints.*.json（MCP 端点/凭据文件：仓库与安装包都不分发）",
+      "docs/verify-host-output.json（取数快照：含真实客户名与金额，不随仓库分发）",
+      "docs/screenshots/**（截图含真实业务数据，不随仓库分发）"
+    ]
+  },
+  "config": {
+    "defaults": {
+      "cacheTtlMs": 21600000,
+      "requestTimeoutMs": 30000,
+      "rowLimit": 100,
+      "stdProbeBudget": 24,
+      "tierSampleSize": 12,
+      "customerSampleSize": 12,
+      "visitSampleSize": 10,
+      "exhaustiveBudget": 120,
+      "stdProbeBudgetMs": 210000,
+      "detailBudget": 40,
+      "geoBudgetMs": 300000,
+      "geoMaxRequests": 300,
+      "salesFirstDepName": "业务咨询事业群",
+      "newbieTargetAmount": 200000,
+      "thresholds": {
+        "stdShare": 0.6,
+        "bShare": 0.4,
+        "cShare": 0.15,
+        "collectionRate": 0.9,
+        "growthDrop": 0.2
+      },
+      "aiProvider": "minimax-cn",
+      "aiModel": "MiniMax-M3.1-Flash",
+      "toolPrefixes": {}
+    },
+    "overridableByCli": {
+      "thresholds": [
+        "stdShare",
+        "bShare",
+        "cShare",
+        "collectionRate",
+        "growthDrop"
+      ],
+      "objects": [
+        "toolPrefixes（用点号路径，例如 --config toolPrefixes.erp=mcp__erp-cn__）"
+      ],
+      "topLevel": [
+        "cacheTtlMs",
+        "requestTimeoutMs",
+        "rowLimit",
+        "stdProbeBudget",
+        "tierSampleSize",
+        "customerSampleSize",
+        "visitSampleSize",
+        "exhaustiveBudget",
+        "stdProbeBudgetMs",
+        "detailBudget",
+        "geoBudgetMs",
+        "geoMaxRequests",
+        "salesFirstDepName",
+        "newbieTargetAmount",
+        "aiProvider",
+        "aiModel"
+      ]
+    }
+  },
+  "paths": {
+    "dshHome": "${DSH_HOME 或 ~/.dsh}",
+    "profileDir": "${dshHome}/profiles/${profile}",
+    "targetDir": "${dshHome}/plugins/erp-sales-dashboard",
+    "profilePackageJson": "${profileDir}/package.json",
+    "profileCordisPatch": "${profileDir}/cordis.patch.yml",
+    "nodeModulesLink": "${profileDir}/node_modules/@local/erp-sales-dashboard",
+    "backupSuffix": ".bak-<YYYYMMDD-HHMMSS>"
+  },
+  "install": {
+    "commandWindows": "powershell -ExecutionPolicy Bypass -File .\\install.ps1",
+    "commandPosix": "sh ./install.sh",
+    "verifyCommand": "node check-install.mjs",
+    "restartRequired": true,
+    "restartReason": "插件的 index.js 是 DSH 启动期加载的 bundle；cordis.patch.yml 会被 DSH 热重载，但代码不会。"
+  },
+  "knownLimits": [
+    "ABC 订单分档与客户分档是抽样口径（ERP 不在订单级暴露 sale_level，分档接口不支持批量）",
+    "抽样池取自区间成交额 Top 客户，不随「梯队筛选」收窄",
+    "9 渠道归因与培训数据 ERP 不承载，页面上显式标注「不可得」",
+    "市场部 / 政委考核 ERP 只给数据源，不给结论",
+    "客户跟进达标率基于抽样",
+    "客户省份地图覆盖率约 95%，未定位省份的客户在「未识别清单」中如实列出，不做任何猜测",
+    "实体档案（客户/业务员/省份地图）受三重限流：detailBudget 40、geoBudgetMs 300000、geoMaxRequests 300；触顶会写明告警，不做无声截断",
+    "上游 sales_order_collection_analysis 单次最多返回 500 行且无翻页参数，插件按日期对半细分至多 2 轮取全，超限仍取不全会如实标记 truncated",
+    "报价 TOP10 是 100 份抽样内的排名，占报价总额比例极小，页面上同时标注「样本内占比」与「占全量比例」"
+  ]
+}

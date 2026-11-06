@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="ERP 销售仪表盘">
+  <rect x="3" y="3" width="42" height="42" rx="10" fill="#0B1B2E" stroke="#C9A227" stroke-width="1.5"/>
+  <rect x="10" y="26" width="6" height="12" rx="1.5" fill="#C9A227"/>
+  <rect x="19" y="18" width="6" height="20" rx="1.5" fill="#E5C25A"/>
+  <rect x="28" y="11" width="6" height="27" rx="1.5" fill="#4E8FD1"/>
+  <path d="M9 22 L18 14 L26 17 L39 8" fill="none" stroke="#EAF0F7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  <circle cx="39" cy="8" r="2.4" fill="#31A06B"/>
+</svg>

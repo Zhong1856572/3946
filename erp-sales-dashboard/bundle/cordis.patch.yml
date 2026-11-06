@@ -1,0 +1,58 @@
+# @local/erp-sales-dashboard 的 bundle patch：把插件插入 profile 补丁层。
+# 数值口径与「ERP 业务工作台」保持一致：
+#   cacheTtlMs 21600000 = 6 小时，首屏打开不重复调取上游。
+- insert:
+    - id: erp-sales-dashboard
+      name: '@local/erp-sales-dashboard'
+      config:
+        cacheTtlMs: 21600000
+        requestTimeoutMs: 30000
+        rowLimit: 100
+        # 签单口径 STD 判定：已判定货号个数上限（按签单额降序）。
+        stdProbeBudget: 150
+        tierSampleSize: 12
+        customerSampleSize: 12
+        visitSampleSize: 10
+        exhaustiveBudget: 120
+        # 明细路由（customer.dashboard / member.dashboard）的上游调用预算。
+        detailBudget: 40
+        # 客户地理分布路由（customer.geo）的墙钟预算（毫秒）与最大上游调用数。
+        # geo 要自举扫描全部客户档案（上游单次硬钳 500 条），天然慢；
+        # 预算一到就停手并如实写告警 —— 宁可覆盖不全也不假装是全量地图。
+        # 2026-11-03 实机：120 次上限被吃光（实际 136 次），客户档案补查没跑完，
+        # 地图缺块却看不出缺在哪儿 → 上限提到 300，墙钟预算同步提到 300 秒。
+        geoBudgetMs: 300000
+        geoMaxRequests: 300
+        # STD 判定探测的墙钟预算（毫秒）。上游 std MCP 单 session 串行、单条 6~8 秒，
+        # 探测必须串行，这个预算是整段封顶。命中本地货号判定缓存的不消耗预算。
+        stdProbeBudgetMs: 90000
+        # 签单口径 STD 占比回看的月份数上限（从区间末月往前数）。
+        # 出库明细单次硬顶 500 行（一个月 700+ 行），覆盖整段区间要 20 次调用、近两分钟，
+        # 首屏扛不住 —— 故按「近 N 个月」算，并在 std.note 里给出覆盖到的窗口与覆盖比例。
+        stdSigningMonthsMax: 4
+        # 出库明细取数的墙钟预算（毫秒）；到点停手，已取到的部分照样参与计算。
+        stdSigningShipBudgetMs: 45000
+        # 销售序列在花名册里的顶层事业群名；新兵表只统计这个事业群的成员。
+        salesFirstDepName: 业务咨询事业群
+        # 新兵转正业绩门槛（元）。方案模板参数，ERP 没有对应字段。
+        newbieTargetAmount: 200000
+        # 智能预警阈值（方案 01「三大能力」之二：红黄绿三色 + 自定义预警阈值）。
+        # 只写要改的键即可；数值一律 0~1 的比率；非法值自动回退默认。
+        # 方向：stdShare/bShare/collectionRate 越高越好；cShare 越低越好；growthDrop 是降幅红线。
+        thresholds:
+          stdShare: 0.6
+          bShare: 0.4
+          cShare: 0.15
+          collectionRate: 0.9
+          growthDrop: 0.2
+        # AI 对话模型；留空则由插件按「agentDefaultModel 当前选择 → minimax → 其它」兜底。
+        aiProvider: minimax-cn
+        aiModel: MiniMax-M3.1-Flash
+        # MCP 工具名前缀（= DSH 连接器名）。**留空 = 自动发现**：插件启动时读
+        # <DSH_HOME>/storages/mcp_connector.json，按 url 端口认领连接器
+        # （8001=erp / 8006=std / 8003=planning），换设备不用改这里。
+        # 只有当本机连接器既不是默认名、端口也不是默认端口时，才需要在这里显式写：
+        #   toolPrefixes:
+        #     erp: mcp__erp-cn__
+        #     std: mcp__std__
+        toolPrefixes: {}

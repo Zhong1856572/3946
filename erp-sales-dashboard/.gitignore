@@ -1,0 +1,22 @@
+# 依赖与运行时产物
+node_modules/
+cache/
+
+# 本机 MCP 端点/凭据（绝不提交）
+*.local.json
+mcp.endpoints.*.json
+
+# 备份与临时文件
+*.bak-*
+*.tmp
+.DS_Store
+Thumbs.db
+
+# 打包脚本在本目录直接跑时产出的临时包（正式发布件放在 releases/ 并入库）
+erp-sales-dashboard-plugin-*.zip
+erp-sales-dashboard-*.tgz
+
+# 正式发布件必须入库：仓库根 .gitignore 里有 *.zip，这里显式放行
+!releases/
+!releases/*.zip
+!releases/*.tgz
